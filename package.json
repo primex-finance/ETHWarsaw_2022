@@ -4,13 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "clean": "npx hardhat clean",
-    "build": "npm run clean && npx hardhat compile",
-    "chain": "npx hardhat node",
-    "deploy": "npx hardhat run --network localhost scripts/deploy.ts",
-    "deploy:rinkeby": "npx hardhat run --network rinkeby scripts/deploy.ts",
-    "test": "npx hardhat test",
-    "coverage": "hardhat coverage --solcoverjs ./.solcover.js --temp artifacts --testfiles \"./test/**/*.ts\""
+    "compile": "yarn prettier:solidity && yarn hardhat compile",
+    "test": "yarn lint && yarn hardhat test",
+    "deploy": "yarn eslint:all-fix && yarn hardhat deploy",
+    "verify": "yarn hardhat etherscan-verify",
+    "node": "yarn hardhat node",
+    "eslint:all": "yarn eslint test/*.ts",
+    "eslint:all-fix": "yarn eslint --fix test/*.ts",
+    "solhint:all": "yarn solhint -c .solhint.json contracts/*.sol contracts/**/*.sol contracts/**/**/*.sol",
+    "prettier:solidity": "./node_modules/.bin/prettier --write contracts/*.sol contracts/**/*.sol contracts/**/**/*.sol",
+    "prettier:js": "./node_modules/.bin/prettier --write test/*.ts",
+    "lint": "yarn prettier:solidity && yarn prettier:js && yarn eslint:all-fix && yarn solhint:all"
   },
   "keywords": [],
   "author": "",
@@ -30,6 +34,14 @@
     "ethereum-waffle": "^3.0.0",
     "ethers": "^5.0.0",
     "hardhat": "^2.8.3",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.24.2",
+    "eslint-plugin-mocha": "^9.0.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.4.1",
+    "eslint-plugin-promise": "^5.1.0",
     "prettier": "^2.4.0",
     "prettier-plugin-solidity": "^1.0.0-beta.18",
     "solhint": "^3.3.6",
@@ -38,5 +50,8 @@
     "ts-node": "^10.2.1",
     "typechain": "^5.1.2",
     "typescript": "^4.5.5"
+  },
+  "dependencies": {
+    "eslint-plugin-prettier": "^4.2.1"
   }
 }
