@@ -107,13 +107,14 @@ contract TestContract is ITestContract {
         uint256 newPositionsCount = maxPositionsCount - delta;
         bool needsOpen = newPositionsCount > positions.length;
 
-        for (uint256 i; i < (needsOpen ? (newPositionsCount - positions.length) : (positions.length - newPositionsCount)); i++) {
+        uint256 count = (needsOpen ? (newPositionsCount - positions.length) : (positions.length - newPositionsCount));
+        for (uint256 i; i < count; i++) {
             if (needsOpen) {
                 bool needsClosure = ((uint(keccak256(abi.encodePacked(block.difficulty + i, block.timestamp, positions))) % 2) == 0);
                 _openPosition(needsClosure);
             } else {
-                uint256 positionId = uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp + i, positions))) % positions.length;
-                _deletePosition(positions[positionId].id);
+                uint256 positionIndex = uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp + i, positions))) % positions.length;
+                _deletePosition(positions[positionIndex].id);
             }
         }
 
@@ -145,9 +146,5 @@ contract TestContract is ITestContract {
         positionIndexes[positions[positions.length - 1].id] = positionIndexes[_id];
         positions.pop();
         delete positionIndexes[_id];
-    }
-
-    function _updatePosition(uint256 _id, bool _needsClosure) internal {
-        positions[_id].needsClosure = _needsClosure;
     }
 }
