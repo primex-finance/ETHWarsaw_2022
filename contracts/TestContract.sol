@@ -79,14 +79,13 @@ contract TestContract is ITestContract {
             Position[] positionsToClose
         )
     {
-        Position[] memory toClose = new Position[](closureOutputSize);
         uint256 count;
 
         Position[] memory positions;
         (positions, newCursor) = getPositionsArray(_cursor, _count);
 
         for (uint256 i; i < positions.length; i++) {
-            if (positions[i].id) {
+            if (positions[i].needsClosure) {
                 positionsToClose[count] = positions[i];
                 count++;
             }
@@ -104,6 +103,7 @@ contract TestContract is ITestContract {
     }
 
     function performUpkeep(Position[] positionsToClose) external override {
+        require(positionsToClose.length <= closureOutputSize, "TestContract::performUpkeep: TOO_MANY_POSITIONS");
         for (uint256 i; i < positionsToClose.length; i++) {
             closePosition(positionsToClose[i].id);
         }
@@ -111,22 +111,30 @@ contract TestContract is ITestContract {
     }
 
     function _shakePositions() internal {
-        uint256 isIncrease = ((uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, positions))) % 2) == 0);
+        uint256 isIncrease = ((uint(keccak256(abi.encodePacked(block.timestamp, block.difficulty, positions))) % 2) == 0);
         uint256 delta = uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, positions))) % maxDeltaPositionsCount;
+        uint256 newPositionsCount = isIncrease ? (initialPositionsCount + delta) : (initialPositionsCount - delta);
 
-        for (uint256 i; i < delta; i++) {
-            if (isIncrease) {
+        bool needsOpen = newPositionsCount > positions.length;
+
+        for (uint256 i; i < (needsOpen ? (newPositionsCount - positions.length) : (positions.length - newPositionsCount)); i++) {
+            if (needsOpen) {
                 bool needsClosure = ((uint(keccak256(abi.encodePacked(block.difficulty + i, block.timestamp, positions))) % 2) == 0);
                 _openPosition(needsClosure);
             } else {
-                uint256 positionId = uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp + 1, positions))) % positions.length;
+                uint256 positionId = uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp + i, positions))) % positions.length;
                 _deletePosition(positions[positionId].id);
             }
+        }
+
+        for (uint256 i; i < positions.length; i++) {
+            bool needsClosure = ((uint(keccak256(abi.encodePacked(block.difficulty + i, block.timestamp, positions))) % 2) == 0);
+            positions[positionId].needsClosure = needsClosure;
         }
     }
 
     function _openPosition(bool _needsClosure) internal {
-        Position memory position = PositionLibrary.Position({
+        Position memory position = Position({
             id: positionsId,
             needsClosure: _needsClosure
         });
