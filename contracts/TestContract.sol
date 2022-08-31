@@ -10,26 +10,19 @@ contract TestContract is ITestContract {
     mapping(uint256 => uint256) public override positionIndexes;
     uint256 public override closureOutputSize;
 
-    uint256 private initialPositionsCount;
-    uint256 private maxDeltaPositionsCount;
+    uint256 private maxPositionsCount;
+    uint256 private positionsRange;
 
-    constructor(uint256 _positionsToOpen, uint256 _closureOutputSize, uint256 _maxDeltaPositionsCount) {
-        require(_positionsToOpen > _maxDeltaPositionsCount, "TestContract::constructor: MAXDELTAPOSITIONSCOUNT_MORE_THAN_POSITIONSTOOPEN");
+    constructor(uint256 _positionsToOpen, uint256 _closureOutputSize, uint256 _positionsRange) {
+        require(_positionsToOpen > (_positionsRange / 2), "TestContract::constructor: MAXDELTAPOSITIONSCOUNT_MORE_THAN_POSITIONSTOOPEN");
         for (uint256 i; i < _positionsToOpen; i++) { 
             bool needsClosure = ((uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, positions))) % 2) == 0);
             _openPosition(needsClosure);
         }
         closureOutputSize = _closureOutputSize;
 
-        initialPositionsCount = _positionsToOpen;
-        maxDeltaPositionsCount = _maxDeltaPositionsCount;
-    }
-
-    function closePosition(uint256 _id) public override {
-        Position storage position = positions[positionIndexes[_id]];
-        require(position.id == _id, "TestContract::closePosition: POSITION_DOES_NOT_EXIST");
-        require(position.needsClosure, "TestContract::closePosition: POSITION_DOES_NOT_NEED_TO_BE_CLOSED");
-        _deletePosition(_id);
+        maxPositionsCount = _positionsToOpen + (_positionsRange / 2);
+        positionsRange = _positionsRange;
     }
 
     function getPosition(uint256 _id) external view override returns (Position memory) {
@@ -76,7 +69,7 @@ contract TestContract is ITestContract {
         returns(
             uint256 newCursor,
             bool upkeepNeeded,
-            Position[] positionsToClose
+            uint256[] positionsToCloseIds
         )
     {
         uint256 count;
@@ -86,7 +79,7 @@ contract TestContract is ITestContract {
 
         for (uint256 i; i < positions.length; i++) {
             if (positions[i].needsClosure) {
-                positionsToClose[count] = positions[i];
+                positionsToCloseIds[count] = positions[i].id;
                 count++;
             }
 
@@ -98,23 +91,20 @@ contract TestContract is ITestContract {
         if (count > 0) {
             upkeepNeeded = true;
         }
-
-        return (newCursor, upkeepNeeded, positionsToClose);
     }
 
-    function performUpkeep(Position[] positionsToClose) external override {
-        require(positionsToClose.length <= closureOutputSize, "TestContract::performUpkeep: TOO_MANY_POSITIONS");
-        for (uint256 i; i < positionsToClose.length; i++) {
-            closePosition(positionsToClose[i].id);
+    function performUpkeep(uint256[] positionsToCloseIds) external override {
+        require(positionsToCloseIds.length <= closureOutputSize, "TestContract::performUpkeep: TOO_MANY_POSITIONS");
+        for (uint256 i; i < positionsToCloseIds.length; i++) {
+            try _closePosition(positionsToCloseIds) {continue;} catch {continue;}
         }
         _shakePositions();
     }
 
     function _shakePositions() internal {
-        uint256 isIncrease = ((uint(keccak256(abi.encodePacked(block.timestamp, block.difficulty, positions))) % 2) == 0);
-        uint256 delta = uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, positions))) % maxDeltaPositionsCount;
-        uint256 newPositionsCount = isIncrease ? (initialPositionsCount + delta) : (initialPositionsCount - delta);
-
+        uint256 randomUint = int(keccak256(abi.encodePacked(block.difficulty, block.timestamp, positions)));
+        uint256 delta = randomUint % positionsRange;
+        uint256 newPositionsCount = maxPositionsCount - delta;
         bool needsOpen = newPositionsCount > positions.length;
 
         for (uint256 i; i < (needsOpen ? (newPositionsCount - positions.length) : (positions.length - newPositionsCount)); i++) {
@@ -127,10 +117,19 @@ contract TestContract is ITestContract {
             }
         }
 
-        for (uint256 i; i < positions.length; i++) {
-            bool needsClosure = ((uint(keccak256(abi.encodePacked(block.difficulty + i, block.timestamp, positions))) % 2) == 0);
+        uint256 changedPositionsCount = randomUint % positionsRange;
+
+        for (uint256 i; i < changedPositionsCount; i++) {
+            uint256 positionId = uint(keccak256(abi.encodePacked(block.difficulty + i, block.timestamp, positions))) % positions.length;
             positions[positionId].needsClosure = needsClosure;
         }
+    }
+
+    function _closePosition(uint256 _id) internal {
+        Position storage position = positions[positionIndexes[_id]];
+        require(position.id == _id, "TestContract::closePosition: POSITION_DOES_NOT_EXIST");
+        require(position.needsClosure, "TestContract::closePosition: POSITION_DOES_NOT_NEED_TO_BE_CLOSED");
+        _deletePosition(_id);
     }
 
     function _openPosition(bool _needsClosure) internal {
