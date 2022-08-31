@@ -117,11 +117,9 @@ contract TestContract is ITestContract {
             }
         }
 
-        uint256 changedPositionsCount = randomUint % positionsRange;
-
-        for (uint256 i; i < changedPositionsCount; i++) {
-            uint256 positionId = uint(keccak256(abi.encodePacked(block.difficulty + i, block.timestamp, positions))) % positions.length;
-            positions[positionId].needsClosure = needsClosure;
+        for (uint256 i; i < delta; i++) {
+            uint256 positionIndex = uint(keccak256(abi.encodePacked(block.difficulty + i, block.timestamp, positions))) % positions.length;
+            positions[positionIndex].needsClosure = !positions[positionIndex].needsClosure;
         }
     }
 
