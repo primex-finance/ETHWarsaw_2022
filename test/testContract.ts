@@ -136,7 +136,9 @@ describe('TestContract', () => {
     }
 
     const overrides: Overrides = {..._overrides, gasPrice: 10000000000};
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     expect(await testContract.connect(addr1).performUpkeep([position!.id], overrides));
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     expect((await testContract.connect(addr1).getPosition(position!.id)).id).to.be.equal(position!.id);
     expect(await testContract.connect(addr1).getAllPositionsLength()).to.be.within(
       positionsToOpen - positionsRange / 2,
