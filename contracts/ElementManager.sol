@@ -6,12 +6,14 @@ import {IElementManager} from "./interfaces/IElementManager.sol";
 contract ElementManager is IElementManager {
     Element[] public override elements;
     uint256 public override elementsId;
+    // id -> index
     mapping(uint256 => uint256) public override elementsIndexes;
 
-    uint256 public override sizeLimit;
-    uint256 private maxElementsCount;
-    uint256 private elementsRange;
+    uint256 public override sizeLimit; // DON'T CHANGE
+    uint256 private maxElementsCount; // DON'T CHANGE
+    uint256 private elementsRange; // DON'T CHANGE
 
+    // DON'T CHANGE
     constructor(
         uint256 _elementsToOpen,
         uint256 _sizeLimit,
@@ -29,7 +31,6 @@ contract ElementManager is IElementManager {
         }
 
         sizeLimit = _sizeLimit;
-
         maxElementsCount = _elementsToOpen + (_elementsRange / 2);
         elementsRange = _elementsRange;
     }
@@ -115,9 +116,10 @@ contract ElementManager is IElementManager {
         for (uint256 i; i < ids.length; i++) {
             _closeElement(ids[i]);
         }
-        _shakeElements();
+        _shakeElements(); // DON'T CHANGE
     }
 
+    // DON'T CHANGE
     function _shakeElements() internal {
         uint256 randomUint = uint256(keccak256(abi.encodePacked(block.difficulty, block.timestamp, elements.length)));
         uint256 delta = randomUint % elementsRange;
