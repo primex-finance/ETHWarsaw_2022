@@ -1,13 +1,12 @@
 {
-  "name": "solidity-hardhat-template",
+  "name": "test-contract",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "compile": "yarn prettier:solidity && yarn hardhat compile",
-    "test": "yarn lint && yarn hardhat test",
-    "deploy": "yarn eslint:all-fix && yarn hardhat deploy",
-    "verify": "yarn hardhat etherscan-verify",
+    "test": "yarn compile && yarn lint && yarn hardhat test",
+    "deploy": "yarn eslint:all-fix && yarn hardhat run --network localhost scripts/deploy.ts",
     "node": "yarn hardhat node",
     "eslint:all": "yarn eslint test/*.ts",
     "eslint:all-fix": "yarn eslint --fix test/*.ts",
@@ -18,7 +17,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.0",
     "@nomiclabs/hardhat-etherscan": "^2.1.6",
@@ -49,9 +48,11 @@
     "solhint": "^3.3.6",
     "solhint-plugin-prettier": "^0.0.5",
     "solidity-coverage": "^0.7.18",
-    "ts-node": "^10.2.1",
+    "ts-node": "^10.9.1",
     "typechain": "^5.1.2",
     "typescript": "^4.8.2"
   },
-  "dependencies": {}
+  "dependencies": {
+    "ts-node-dev": "^2.0.0"
+  }
 }
