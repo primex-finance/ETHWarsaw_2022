@@ -1,29 +1,24 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// When running the script with `npx hardhat run <script>` you'll find the Hardhat
-// Runtime Environment's members available in the global scope.
-import {ethers} from 'hardhat';
+import { ethers } from 'hardhat';
+import { Overrides } from 'ethers';
+
+const _overrides: Overrides = {
+  gasLimit: 30000000,
+};
 
 async function main() {
-  // Hardhat always runs the compile task when running scripts with its command
-  // line interface.
-  //
-  // If this script is run directly using `node` you may want to call compile
-  // manually to make sure everything is compiled
-  // await hre.run('compile');
+  const positionsToOpen = "100";
+  const closureOutputSize = "10";
+  const positionsRange = "20";
 
-  // We get the contract to deploy
-  const WorldPurpose = await ethers.getContractFactory('WorldPurpose');
-  const worldPurpose = await WorldPurpose.deploy();
+  const TestContract = await ethers.getContractFactory('TestContract');
+  const overrides: Overrides = { ..._overrides, gasPrice: 10000000000 };
+  const testContract = await TestContract.deploy(positionsToOpen, closureOutputSize, positionsRange, overrides);
 
-  await worldPurpose.deployed();
+  await testContract.deployed();
 
-  console.log('WorldPurpose deployed to:', worldPurpose.address);
+  console.log('TestContract deployed to:', testContract.address);
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
 main()
   .then(() => process.exit(0))
   .catch((error) => {
