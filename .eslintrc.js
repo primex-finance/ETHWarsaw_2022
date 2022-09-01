@@ -1,29 +1,32 @@
 module.exports = {
-  "env": {
-    "es6": true,
-    "node": true
+  parser: '@typescript-eslint/parser', // Specifies the ESLint parser
+  parserOptions: {
+    ecmaVersion: 2020, // Allows for the parsing of modern ECMAScript features
+    sourceType: 'module', // Allows for the use of imports
+    ecmaFeatures: {
+      jsx: true, // Allows for the parsing of JSX
+    },
   },
-  "extends": [
-    "standard",
-    "eslint:recommended",
-    "plugin:node/recommended",
-    "plugin:mocha/recommended",
-    "prettier"
+  settings: {
+    react: {
+      version: 'detect', // Tells eslint-plugin-react to automatically detect the version of React to use
+    },
+  },
+  extends: [
+    'plugin:@typescript-eslint/recommended', // Uses the recommended rules from the @typescript-eslint/eslint-plugin
+    'plugin:prettier/recommended',
   ],
-  "globals": {
-    "Atomics": "readonly",
-    "SharedArrayBuffer": "readonly"
+  rules: {
+    '@typescript-eslint/no-unused-vars': 'error',
+    '@typescript-eslint/no-var-requires': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/ban-ts-comment': 'off',
+    '@typescript-eslint/explicit-module-boundary-types': [
+      'error',
+      {
+        allowArgumentsExplicitlyTypedAsAny: true,
+      },
+    ],
+    quotes: ['error', 'single'],
   },
-  "parserOptions": {
-    "ecmaVersion": 2020,
-    "sourceType": "module"
-  },
-  "rules": {
-    "indent": ["error", 2],
-    "linebreak-style": ["error", (process.platform === "win32" ? "windows" : "unix")],
-    "quotes": ["error", "double"],
-    "semi": ["error", "always"],
-    "node/no-unpublished-require": "off"
-  },
-  "plugins": ["prettier"]
-}
+};
