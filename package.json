@@ -1,13 +1,12 @@
 {
-  "name": "solidity-hardhat-template",
+  "name": "test-contract",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "compile": "yarn prettier:solidity && yarn hardhat compile",
-    "test": "yarn lint && yarn hardhat test",
-    "deploy": "yarn eslint:all-fix && yarn hardhat deploy",
-    "verify": "yarn hardhat etherscan-verify",
+    "test": "yarn compile && yarn lint && yarn hardhat test",
+    "deploy": "yarn eslint:all-fix && yarn hardhat run --network localhost scripts/deploy.ts",
     "node": "yarn hardhat node",
     "eslint:all": "yarn eslint test/*.ts",
     "eslint:all-fix": "yarn eslint --fix test/*.ts",
@@ -18,7 +17,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.0",
     "@nomiclabs/hardhat-etherscan": "^2.1.6",
@@ -29,29 +28,31 @@
     "@types/chai": "^4.2.21",
     "@types/mocha": "^9.1.0",
     "@types/node": "^17.0.13",
+    "@typescript-eslint/eslint-plugin": "^5.36.1",
+    "@typescript-eslint/parser": "^5.36.1",
     "chai": "^4.3.6",
     "dotenv": "^10.0.0",
-    "ethereum-waffle": "^3.0.0",
-    "ethers": "^5.0.0",
-    "hardhat": "^2.8.3",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-config-standard": "^16.0.3",
     "eslint-plugin-import": "^2.24.2",
     "eslint-plugin-mocha": "^9.0.0",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-prettier": "^3.4.1",
+    "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-promise": "^5.1.0",
+    "ethereum-waffle": "^3.0.0",
+    "ethers": "^5.0.0",
+    "hardhat": "^2.10.2",
     "prettier": "^2.4.0",
     "prettier-plugin-solidity": "^1.0.0-beta.18",
     "solhint": "^3.3.6",
     "solhint-plugin-prettier": "^0.0.5",
     "solidity-coverage": "^0.7.18",
-    "ts-node": "^10.2.1",
+    "ts-node": "^10.9.1",
     "typechain": "^5.1.2",
-    "typescript": "^4.5.5"
+    "typescript": "^4.8.2"
   },
   "dependencies": {
-    "eslint-plugin-prettier": "^4.2.1"
+    "ts-node-dev": "^2.0.0"
   }
 }

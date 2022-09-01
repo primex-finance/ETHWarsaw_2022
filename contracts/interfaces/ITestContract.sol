@@ -1,20 +1,13 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.8.10;
+pragma solidity 0.8.16;
 
 interface ITestContract {
-
     struct Position {
         uint256 id;
         bool needsClosure;
     }
 
-    function positions(uint256 _index)
-        external
-        view
-        returns (
-            uint256 id,
-            bool needsClosure
-        );
+    function positions(uint256 _index) external view returns (uint256 id, bool needsClosure);
 
     function positionsId() external view returns (uint256);
 
@@ -33,10 +26,7 @@ interface ITestContract {
         view
         returns (Position[] memory positionsArray, uint256 newCursor);
 
-    function checkPositionUpkeep(
-        uint256 _cursor,
-        uint256 _count
-    )
+    function checkPositionUpkeep(uint256 _cursor, uint256 _count)
         external
         returns (
             uint256 newCursor,
@@ -45,6 +35,4 @@ interface ITestContract {
         );
 
     function performUpkeep(uint256[] memory positionsToCloseIds) external;
-
-    
 }

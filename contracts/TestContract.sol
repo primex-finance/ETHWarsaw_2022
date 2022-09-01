@@ -1,10 +1,9 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.10;
+pragma solidity ^0.8.16;
 
 import {ITestContract} from "./interfaces/ITestContract.sol";
 
 contract TestContract is ITestContract {
-    
     Position[] public override positions;
     uint256 public override positionsId;
     mapping(uint256 => uint256) public override positionIndexes;
@@ -13,10 +12,19 @@ contract TestContract is ITestContract {
     uint256 private maxPositionsCount;
     uint256 private positionsRange;
 
-    constructor(uint256 _positionsToOpen, uint256 _closureOutputSize, uint256 _positionsRange) {
-        require(_positionsToOpen > (_positionsRange / 2), "TestContract::constructor: MAXDELTAPOSITIONSCOUNT_MORE_THAN_POSITIONSTOOPEN");
-        for (uint256 i; i < _positionsToOpen; i++) { 
-            bool needsClosure = ((uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, positions.length))) % 2) == 0);
+    constructor(
+        uint256 _positionsToOpen,
+        uint256 _closureOutputSize,
+        uint256 _positionsRange
+    ) {
+        require(
+            _positionsToOpen > (_positionsRange / 2),
+            "TestContract::constructor: MAXDELTAPOSITIONSCOUNT_MORE_THAN_POSITIONSTOOPEN"
+        );
+        for (uint256 i; i < _positionsToOpen; i++) {
+            bool needsClosure = ((uint256(
+                keccak256(abi.encodePacked(block.difficulty, block.timestamp, positions.length))
+            ) % 2) == 0);
             _openPosition(needsClosure);
         }
         closureOutputSize = _closureOutputSize;
@@ -59,14 +67,11 @@ contract TestContract is ITestContract {
         }
     }
 
-    function checkPositionUpkeep(        
-        uint256 _cursor,
-        uint256 _count
-    )
+    function checkPositionUpkeep(uint256 _cursor, uint256 _count)
         external
         view
         override
-        returns(
+        returns (
             uint256 newCursor,
             bool upkeepNeeded,
             uint256[] memory positionsToCloseIds
@@ -113,7 +118,7 @@ contract TestContract is ITestContract {
     }
 
     function _shakePositions() internal {
-        uint256 randomUint = uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, positions.length)));
+        uint256 randomUint = uint256(keccak256(abi.encodePacked(block.difficulty, block.timestamp, positions.length)));
         uint256 delta = randomUint % positionsRange;
         uint256 newPositionsCount = maxPositionsCount - delta;
         bool needsOpen = newPositionsCount > positions.length;
@@ -121,16 +126,22 @@ contract TestContract is ITestContract {
         uint256 count = (needsOpen ? (newPositionsCount - positions.length) : (positions.length - newPositionsCount));
         for (uint256 i; i < count; i++) {
             if (needsOpen) {
-                bool needsClosure = ((uint(keccak256(abi.encodePacked(block.difficulty + i, block.timestamp, positions.length))) % 2) == 0);
+                bool needsClosure = ((uint256(
+                    keccak256(abi.encodePacked(block.difficulty + i, block.timestamp, positions.length))
+                ) % 2) == 0);
                 _openPosition(needsClosure);
             } else {
-                uint256 positionIndex = uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp + i, positions.length))) % positions.length;
+                uint256 positionIndex = uint256(
+                    keccak256(abi.encodePacked(block.difficulty, block.timestamp + i, positions.length))
+                ) % positions.length;
                 _deletePosition(positions[positionIndex].id);
             }
         }
 
         for (uint256 i; i < delta; i++) {
-            uint256 positionIndex = uint(keccak256(abi.encodePacked(block.difficulty + i, block.timestamp, positions.length))) % positions.length;
+            uint256 positionIndex = uint256(
+                keccak256(abi.encodePacked(block.difficulty + i, block.timestamp, positions.length))
+            ) % positions.length;
             positions[positionIndex].needsClosure = !positions[positionIndex].needsClosure;
         }
     }
@@ -143,10 +154,7 @@ contract TestContract is ITestContract {
     }
 
     function _openPosition(bool _needsClosure) internal {
-        Position memory position = Position({
-            id: positionsId,
-            needsClosure: _needsClosure
-        });
+        Position memory position = Position({id: positionsId, needsClosure: _needsClosure});
         positionsId++;
         positions.push(position);
         positionIndexes[position.id] = positions.length - 1;
