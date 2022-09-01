@@ -1,8 +1,8 @@
 import {ethers, waffle, network} from 'hardhat';
 import chai from 'chai';
 
-import TestContractArtifact from '../artifacts/contracts/TestContract.sol/TestContract.json';
-import {TestContract} from '../typechain/TestContract';
+import TestContractArtifact from '../artifacts/contracts/ElementManager.sol/ElementManager.json';
+import {ElementManager} from '../typechain/ElementManager';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
 const {deployContract} = waffle;
@@ -14,24 +14,24 @@ const _overrides: Overrides = {
   gasLimit: 30000000,
 };
 
-describe('TestContract', () => {
+describe('ElementManager', () => {
   let snapshotId: number;
   let owner: SignerWithAddress;
   let addr1: SignerWithAddress;
 
-  let testContract: TestContract;
+  let testContract: ElementManager;
 
-  const positionsToOpen = 100;
-  const closureOutputSize = 10;
-  const positionsRange = 20;
+  const elementsToOpen = 100;
+  const sizeLimit = 10;
+  const elementsRange = 20;
 
   before(async () => {
     [owner, addr1] = await ethers.getSigners();
     testContract = (await deployContract(owner, TestContractArtifact, [
-      positionsToOpen,
-      closureOutputSize,
-      positionsRange,
-    ])) as TestContract;
+      elementsToOpen,
+      sizeLimit,
+      elementsRange,
+    ])) as ElementManager;
   });
 
   beforeEach(async function () {
@@ -48,101 +48,99 @@ describe('TestContract', () => {
   });
 
   it('Should check initials', async () => {
-    expect(await testContract.connect(addr1).positionsId()).to.be.equal(positionsToOpen);
-    expect(await testContract.connect(addr1).closureOutputSize()).to.be.equal(closureOutputSize);
+    expect(await testContract.connect(addr1).elementsId()).to.be.equal(elementsToOpen);
+    expect(await testContract.connect(addr1).sizeLimit()).to.be.equal(sizeLimit);
   });
 
-  it('Should getPosition', async () => {
-    expect(await testContract.connect(addr1).getPosition(0));
+  it('Should getElement', async () => {
+    expect(await testContract.connect(addr1).getElement(0));
   });
 
-  it('Should getAllPositionsLength', async () => {
-    expect(await testContract.connect(addr1).getAllPositionsLength()).to.be.equal(positionsToOpen);
+  it('Should getAllElementsLength', async () => {
+    expect(await testContract.connect(addr1).getAllElementsLength()).to.be.equal(elementsToOpen);
   });
 
-  it('Should getAllPositions', async () => {
-    expect((await testContract.connect(addr1).getAllPositions()).length).to.be.equal(positionsToOpen);
+  it('Should getAllElements', async () => {
+    expect((await testContract.connect(addr1).getAllElements()).length).to.be.equal(elementsToOpen);
   });
 
-  it('Should getPositionsArray', async () => {
+  it('Should getElementsPage', async () => {
     const cursor = 1;
     const count = 5;
-    const tx = await testContract.connect(addr1).getPositionsArray(cursor, count);
-    expect(tx.positionsArray.length).to.be.equal(count);
+    const tx = await testContract.connect(addr1).getElementsPage(cursor, count);
+    expect(tx.elementsPage.length).to.be.equal(count);
     expect(tx.newCursor).to.be.equal(cursor + count);
   });
 
-  it('Should getPositionsArray if cursor >= positions length', async () => {
+  it('Should getElementsPage if cursor >= elements length', async () => {
     const cursor = 200;
     const count = 5;
-    const tx = await testContract.connect(addr1).getPositionsArray(cursor, count);
-    expect(tx.positionsArray.length).to.be.equal(0);
+    const tx = await testContract.connect(addr1).getElementsPage(cursor, count);
+    expect(tx.elementsPage.length).to.be.equal(0);
     expect(tx.newCursor).to.be.equal(0);
   });
 
-  it('Should getPositionsArray if cursor + count >= positions length', async () => {
-    const positionsLength = (await testContract.connect(addr1).getAllPositionsLength()).toNumber();
-    const cursor = positionsLength - 2;
+  it('Should getElementsPage if cursor + count >= elements length', async () => {
+    const elementsLength = (await testContract.connect(addr1).getAllElementsLength()).toNumber();
+    const cursor = elementsLength - 2;
     const count = 4;
-    const tx = await testContract.connect(addr1).getPositionsArray(cursor, count);
-    expect(tx.positionsArray.length).to.be.equal(positionsLength - cursor);
+    const tx = await testContract.connect(addr1).getElementsPage(cursor, count);
+    expect(tx.elementsPage.length).to.be.equal(elementsLength - cursor);
     expect(tx.newCursor).to.be.equal(0);
   });
 
-  it('Should checkPositionUpkeep', async () => {
+  it('Should getClosableElements', async () => {
     const cursor = 1;
     const count = 5;
-    const tx = await testContract.connect(addr1).checkPositionUpkeep(cursor, count);
+    const tx = await testContract.connect(addr1).getClosableElements(cursor, count);
     expect(tx.newCursor).to.be.equal(cursor + count);
-    expect(tx.upkeepNeeded).to.be.equal(tx.positionsToCloseIds.length > 0);
+    expect(tx.closureNeeded).to.be.equal(tx.ids.length > 0);
   });
 
-  it('Should checkPositionUpkeep more then max output size', async () => {
+  it('Should getClosableElements more then max output size', async () => {
     const cursor = 0;
     const count = 100;
-    const tx = await testContract.connect(addr1).checkPositionUpkeep(cursor, count);
-    expect(tx.newCursor).to.be.equal(cursor + closureOutputSize);
-    expect(tx.upkeepNeeded).to.be.equal(tx.positionsToCloseIds.length > 0);
+    const tx = await testContract.connect(addr1).getClosableElements(cursor, count);
+    expect(tx.newCursor).to.be.equal(cursor + sizeLimit);
+    expect(tx.closureNeeded).to.be.equal(tx.ids.length > 0);
   });
 
-  it('Should performUpkeep', async () => {
+  it('Should closeElements', async () => {
     const cursor = 0;
     const count = 100;
-    const checkTx = await testContract.connect(addr1).checkPositionUpkeep(cursor, count);
-    expect(checkTx.newCursor).to.be.equal(cursor + closureOutputSize);
-    expect(checkTx.upkeepNeeded).to.be.equal(checkTx.positionsToCloseIds.length > 0);
+    const checkTx = await testContract.connect(addr1).getClosableElements(cursor, count);
+    expect(checkTx.newCursor).to.be.equal(cursor + sizeLimit);
+    expect(checkTx.closureNeeded).to.be.equal(checkTx.ids.length > 0);
 
     const overrides: Overrides = {..._overrides, gasPrice: 10000000000};
-    expect(await testContract.connect(addr1).performUpkeep(checkTx.positionsToCloseIds, overrides));
-    for (let i = 0; i < checkTx.positionsToCloseIds.length; i++) {
-      expect((await testContract.connect(addr1).getPosition(checkTx.positionsToCloseIds[i])).id).to.be.not.equal(
-        checkTx.positionsToCloseIds[i],
-      );
+    expect(await testContract.connect(addr1).closeElements(checkTx.ids, overrides));
+    for (let i = 0; i < checkTx.ids.length; i++) {
+      expect((await testContract.connect(addr1).getElement(checkTx.ids[i])).id).to.be.not.equal(checkTx.ids[i]);
     }
-    expect(await testContract.connect(addr1).getAllPositionsLength()).to.be.within(
-      positionsToOpen - positionsRange / 2,
-      positionsToOpen + positionsRange / 2,
+    expect(await testContract.connect(addr1).getAllElementsLength()).to.be.within(
+      elementsToOpen - elementsRange / 2,
+      elementsToOpen + elementsRange / 2,
     );
   });
 
-  it('Should performUpkeep with with no need to close position', async () => {
-    const positions = await testContract.connect(addr1).getAllPositions();
-    let position: [BigNumber, boolean] & {id: BigNumber; needsClosure: boolean};
-    for (let i = 0; i < positions.length; i++) {
-      if (!positions[i].needsClosure) {
-        position = positions[i];
+  it('Should closeElements with with no need to close element', async () => {
+    const elements = await testContract.connect(addr1).getAllElements();
+    let element: [BigNumber, boolean] & {id: BigNumber; isClosable: boolean};
+    for (let i = 0; i < elements.length; i++) {
+      if (!elements[i].isClosable) {
+        element = elements[i];
         break;
       }
     }
 
     const overrides: Overrides = {..._overrides, gasPrice: 10000000000};
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    expect(await testContract.connect(addr1).performUpkeep([position!.id], overrides));
+    expect(await testContract.connect(addr1).closeElements([element!.id], overrides));
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    expect((await testContract.connect(addr1).getPosition(position!.id)).id).to.be.equal(position!.id);
-    expect(await testContract.connect(addr1).getAllPositionsLength()).to.be.within(
-      positionsToOpen - positionsRange / 2,
-      positionsToOpen + positionsRange / 2,
+    expect((await testContract.connect(addr1).getElement(element!.id)).id).to.be.equal(element!.id);
+    expect(await testContract.connect(addr1).getAllElementsLength()).to.be.within(
+      elementsToOpen - elementsRange / 2,
+      elementsToOpen + elementsRange / 2,
     );
   });
 });

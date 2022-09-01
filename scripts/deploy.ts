@@ -6,17 +6,17 @@ const _overrides: Overrides = {
 };
 
 async function main() {
-  const positionsToOpen = "100";
-  const closureOutputSize = "10";
-  const positionsRange = "20";
+  const elementsToOpen = "100";
+  const sizeLimit = "10";
+  const elementsRange = "20";
 
-  const TestContract = await ethers.getContractFactory('TestContract');
+  const ElementManager = await ethers.getContractFactory('ElementManager');
   const overrides: Overrides = { ..._overrides, gasPrice: 10000000000 };
-  const testContract = await TestContract.deploy(positionsToOpen, closureOutputSize, positionsRange, overrides);
+  const testContract = await ElementManager.deploy(elementsToOpen, sizeLimit, elementsRange, overrides);
 
   await testContract.deployed();
 
-  console.log('TestContract deployed to:', testContract.address);
+  console.log('ElementManager deployed to:', testContract.address);
 }
 
 main()
