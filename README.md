@@ -1,40 +1,49 @@
-# 🛠️ solidity-template
+# Task
 
-> **TLDR;** pre-configured hardhat project to run, debug, test and deploy your next solidity smart contract.
->
-> This project should be your personal and always reliable swiss knife available in your pocket when you need to create a new Solidity project to be released on the Ethereum Blockchain.
+It is a well-known fact that EVM smart contracts don’t support triggers, a contract can’t automatically call itself, and each action must be initiated by an external actor. It limits the business logic that can be implemented on-chain and makes the development process more difficult. As a DeFi protocol, we must monitor multiple conditions and respond to them quickly. Keepers have a special role, being responsible for this. It’s an off-chain component that monitors on-chain conditions and sends necessary transactions. Keepers are rewarded for their activity.
 
-📚 Do you need a more ** detailed explanation**? Just check out my blog post ["How to deploy your first smart contract on Ethereum with Solidity and Hardhat"](https://stermi.medium.com/how-to-deploy-your-first-smart-contract-on-ethereum-with-solidity-and-hardhat-22f21d31096e) where I explain how to build this solidity-template from 0.
+Think of the Keeper's job as processing user requests that should be executed when certain conditions are met. Different requests may have different execution conditions and requests can be added or canceled by users at any moment. The Keeper does not know when and how many conditions are met. Therefore, the conditions must be checked at every point in time. A Keeper should send a transaction to execute a request ASAP when its conditions are reached – a small delay of several minutes is applicable – otherwise, the system may face financial losses.
 
-## What is inside?
+ We need a decentralized layer of Keepers because a single Keeper brings the risks of centralization that DeFi aims to avoid. One request can’t be executed twice, so only the first Keeper is rewarded, which creates a race between Keepers where each of them wants their transactions to be executed faster than others and they overpay for gas. Keepers are trustless; all their actions are verified on-chain and a Keeper can stop working anytime.
 
-- Example of well-made Solidity Contract
-- Example of a well-made test suite for your Solidity Contract
-- Pre-configured Hardhat project
-- Automatically generate TypeScript bindings
+You need to create a consensus algorithm that helps Keepers to work in the most efficient way.
 
-## Hardhat plugins included
+You should describe the idea of your consensus and implement the on-chain part of it. 
+Propose a way how Keepers can optimize the monitoring and execution of multiple requests.
+You can change the initial smart contract but not the execution condition.
 
-- [hardhat-ethers](https://hardhat.org/plugins/nomiclabs-hardhat-ethers.html): injects `ethers.js` into the Hardhat Runtime Environment
-- [hardhat-waffle](https://hardhat.org/plugins/nomiclabs-hardhat-waffle.html): adds a Waffle-compatible provider to the Hardhat Runtime Environment and automatically initializes the Waffle Chai matchers
-- [TypeChain](https://hardhat.org/plugins/typechain-hardhat.html): automatically generate TypeScript bindings for smartcontracts
-- [hardhat-solhint](https://hardhat.org/plugins/nomiclabs-hardhat-solhint.html): easily run solhint to lint your Solidity code
-- [hardhat-etherscan](https://hardhat.org/plugins/nomiclabs-hardhat-etherscan.html): automatically verify contracts on Etherscan
 
-## How to use it
+# How to start
+```
+yarn install
 
-1.  Click the "Use this template" green button
-2.  `yarn install`
-3.  Modify the contract/test case
-4.  Run the contract locally with `yarn chain` and `yarn deploy` (deploy to local hardhat network)
-5.  Test the contract with `yarn test`
-6.  Change `.env.example` into `.env` and configure it
-7.  Deploy your contract where you want!
+yarn hardhat node
+yarn deploy
+```
 
-## TODO
+# About ElementManager.sol
+You have array with Elements
+```
+struct Element {
+        uint256 id;
+        bool isClosable;
+}
 
-- [ ] Support to eslint for the typescript testing lib
-- [ ] Support for [hardhat-deploy](https://hardhat.org/plugins/hardhat-deploy.html), an Hardhat Plugin to better manage deployment
-- [ ] Add support to [solidity-coverage](https://hardhat.org/plugins/solidity-coverage.html) plugin
-- [ ] Add support to [hardhat-gas-reporter plugin](https://hardhat.org/plugins/hardhat-gas-reporter.html)
-- [ ] TBD / Create a PR with suggestions!
+Element[] public override elements;
+```
+
+If `Element.isClosable == true` you should `closeElements()` it
+
+`Element.isClosable` can be changed at any time. You should update info about elements.
+
+# Rules
+- You are not allowed to change the code with a comment `// DO NOT EDIT`:
+  - sizeLimit;
+  - constructor();
+  - _shakeElements();
+- You are not allowed to add an event about a `Element.isClosable` change
+- Everything else can be changed. You can add methods, change code, write your own contracts, and so on.
+- If you feel like you need to change what is forbidden, you can try changing it. But it is better to contact us through the organizers.
+- If you find a bug in our code please let us know.
+
+

@@ -10,8 +10,8 @@ contract ElementManager is IElementManager {
     mapping(uint256 => uint256) public override elementsIndexes;
 
     uint256 public override sizeLimit; // DON'T CHANGE
-    uint256 private maxElementsCount; // DON'T CHANGE
-    uint256 private elementsRange; // DON'T CHANGE
+    uint256 private maxElementsCount;
+    uint256 private elementsRange;
 
     // DON'T CHANGE
     constructor(
