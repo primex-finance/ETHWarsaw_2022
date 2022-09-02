@@ -6,7 +6,7 @@ Think of the Keeper's job as processing user requests that should be executed wh
 
  We need a decentralized layer of Keepers because a single Keeper brings the risks of centralization that DeFi aims to avoid. One request can’t be executed twice, so only the first Keeper is rewarded, which creates a race between Keepers where each of them wants their transactions to be executed faster than others and they overpay for gas. Keepers are trustless; all their actions are verified on-chain and a Keeper can stop working anytime.
 
-You need to create a consensus algorithm that helps Keepers to work in the most efficient way.
+You need to create a consensus algorithm that helps Keepers to work in the most efficient way. Keepers are decentralized and can communicate both on-chain and off-chain.
 
 You should describe the idea of your consensus and implement the on-chain part of it. 
 Propose a way how Keepers can optimize the monitoring and execution of multiple requests.
@@ -45,5 +45,3 @@ If `Element.isClosable == true` you should `closeElements()` it
 - Everything else can be changed. You can add methods, change code, write your own contracts, and so on.
 - If you feel like you need to change what is forbidden, you can try changing it. But it is better to contact us through the organizers.
 - If you find a bug in our code please let us know.
-
-
