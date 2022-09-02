@@ -1,5 +1,5 @@
 {
-  "name": "test-contract",
+  "name": "element-manager",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -7,7 +7,6 @@
     "compile": "yarn prettier:solidity && yarn hardhat compile",
     "test": "yarn compile && yarn lint && yarn hardhat test",
     "deploy": "yarn eslint:all-fix && yarn hardhat run --network localhost scripts/deploy.ts",
-    "node": "yarn hardhat node",
     "eslint:all": "yarn eslint test/*.ts",
     "eslint:all-fix": "yarn eslint --fix test/*.ts",
     "solhint:all": "yarn solhint -c .solhint.json contracts/*.sol contracts/**/*.sol contracts/**/**/*.sol",

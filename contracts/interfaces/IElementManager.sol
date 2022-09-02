@@ -28,6 +28,7 @@ interface IElementManager {
 
     function getClosableElements(uint256 _cursor, uint256 _count)
         external
+        view
         returns (
             uint256 newCursor,
             bool closureNeeded,
