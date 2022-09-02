@@ -37,7 +37,7 @@ If `Element.isClosable == true` you should `closeElements()` it
 `Element.isClosable` can be changed at any time. You should update info about elements.
 
 # Rules
-- You are not allowed to change the code with a comment `// DO NOT EDIT`:
+- You are not allowed to change the code with a comment `// DON'T CHANGE`:
   - sizeLimit;
   - constructor();
   - _shakeElements();
